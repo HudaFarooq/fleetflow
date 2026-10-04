@@ -1,0 +1,11 @@
+# Store text files with LF line endings in the repository, whatever the OS.
+* text=auto eol=lf
+
+# PowerShell scripts run on Windows; keep CRLF for them
+*.ps1 text eol=crlf
+
+# Binary files: never touch
+*.png binary
+*.ico binary
+*.jpg binary
+*.woff2 binary
