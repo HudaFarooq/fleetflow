@@ -1,0 +1,15 @@
+# What the server needs to run. Exact versions, so production matches what the tests ran on.
+# Development tools (tests, linter) are in requirements-dev.txt.
+fastapi==0.142.2
+uvicorn[standard]==0.54.0
+sqlalchemy==2.1.3
+alembic==1.20.0
+psycopg[binary]==3.3.6
+pydantic-settings==2.15.0
+email-validator==2.3.0
+pyjwt==2.15.1
+bcrypt==5.0.0
+python-multipart==0.0.32
+httpx==0.28.1
+ortools==9.15.6755
+tzdata==2026.5  # time zone data (Windows and slim Docker images lack it)
