@@ -25,6 +25,7 @@ LOW_BATTERY, CHARGED = 15.0, 90.0
 class FleetSimulator:
     def __init__(self) -> None:
         self._task: asyncio.Task | None = None
+        self._stopping = asyncio.Event()
         self._waypoints: dict[int, tuple[float, float]] = {}
         self._rng = random.Random()
 
@@ -34,16 +35,16 @@ class FleetSimulator:
 
     def start(self) -> None:
         if not self.running:
-            self._task = asyncio.get_running_loop().create_task(self._run())
+            self._stopping = asyncio.Event()
+            self._task = asyncio.get_running_loop().create_task(self._run(self._stopping))
         manager.publish({"type": "simulation", "running": True})
 
     async def stop(self) -> None:
         if self._task:
-            self._task.cancel()
-            try:
-                await self._task
-            except asyncio.CancelledError:
-                pass
+            # Ask the loop to finish rather than cancelling it: a tick already running in its
+            # worker thread can't be interrupted, and must not overlap with unplugging below.
+            self._stopping.set()
+            await self._task
             self._task = None
             await asyncio.to_thread(self.unplug_all)
         manager.publish({"type": "simulation", "running": False})
@@ -59,11 +60,14 @@ class FleetSimulator:
             for vehicle in charging:
                 publish_vehicle(vehicle)
 
-    async def _run(self) -> None:
-        while True:
+    async def _run(self, stopping: asyncio.Event) -> None:
+        while not stopping.is_set():
             # Database work is blocking, so it runs off the event loop
             await asyncio.to_thread(self.tick)
-            await asyncio.sleep(TICK_SECONDS)
+            try:
+                await asyncio.wait_for(stopping.wait(), TICK_SECONDS)  # sleep, but wake at once on stop
+            except asyncio.TimeoutError:
+                pass
 
     def _waypoint(self, vehicle: Vehicle, centre: tuple[float, float]) -> tuple[float, float]:
         target = self._waypoints.get(vehicle.id)
