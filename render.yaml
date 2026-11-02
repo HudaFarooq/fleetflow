@@ -5,6 +5,7 @@ services:
     name: fleetflow-api
     runtime: python
     plan: free
+    region: ohio # same region as the Neon database (AWS US East 2), so each query is a short hop
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     # Migrate, add demo data if the database is empty, then serve.

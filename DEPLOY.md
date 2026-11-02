@@ -32,7 +32,7 @@ Check that `backend/.env` was **not** uploaded; `.gitignore` excludes it because
 
 ## 2. Database: Neon
 
-1. Sign up at neon.tech and create a project (pick the region nearest your users).
+1. Sign up at neon.tech and create a project in **AWS US East 2 (Ohio)**. The API runs in Render's Ohio region (set in `render.yaml`), and the two should sit together because every page makes several database queries.
 2. Copy the **connection string**. It looks like `postgresql://user:password@ep-xxx.neon.tech/neondb?sslmode=require`.
 
 ## 3. API: Render
