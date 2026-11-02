@@ -13,6 +13,8 @@ services:
     # One process only: login lockouts, assistant limits and live-update connections are kept in memory.
     startCommand: python -m scripts.init_db --seed && uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips "*"
     healthCheckPath: /health
+    # Stays awake: the free plan sleeps after 15 idle minutes, so the API visits its own public URL
+    # (RENDER_EXTERNAL_URL, set by Render) every KEEP_ALIVE_MINUTES. See DEPLOY.md for a backup monitor.
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
@@ -28,6 +30,8 @@ services:
         sync: false # JSON list with your Vercel URL, e.g. ["https://fleetflow.vercel.app"]
       - key: FRONTEND_URL
         sync: false # e.g. https://fleetflow.vercel.app (used in email links)
+      - key: KEEP_ALIVE_MINUTES
+        value: "11"
       - key: DEPOT_TIMEZONE
         value: Asia/Karachi
       - key: GEMINI_API_KEY

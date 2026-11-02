@@ -1,4 +1,4 @@
-from pydantic import field_validator, model_validator
+from pydantic import AliasChoices, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEV_JWT_SECRET = "dev-only-secret-change-me-in-your-env-file"
@@ -60,6 +60,11 @@ class Settings(BaseSettings):
     # Cost guards: free tiers have quotas, and paid keys cost money per request
     assistant_per_user_per_hour: int = 20
     assistant_daily_cap: int = 200
+
+    # Keep-alive: the server visits its own public URL so free hosting never puts it to sleep.
+    # Render sets RENDER_EXTERNAL_URL automatically; KEEP_ALIVE_URL overrides it. Off when neither is set.
+    keep_alive_url: str | None = Field(default=None, validation_alias=AliasChoices("KEEP_ALIVE_URL", "RENDER_EXTERNAL_URL"))
+    keep_alive_minutes: float = Field(default=11, gt=0, lt=15)  # Render sleeps after 15 idle minutes
 
     @field_validator("database_url")
     @classmethod

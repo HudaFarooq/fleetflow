@@ -5,7 +5,7 @@ Three free services, about 20 minutes:
 | Part | Service | Free plan notes |
 |---|---|---|
 | Database | [Neon](https://neon.tech) (PostgreSQL) | Pauses when idle and wakes on the next query |
-| API | [Render](https://render.com) | Sleeps after 15 minutes idle; the first request then takes about a minute |
+| API | [Render](https://render.com) | Would sleep after 15 idle minutes; FleetFlow keeps itself awake (see below) |
 | Web app | [Vercel](https://vercel.com) | Always on |
 
 None of them need a credit card.
@@ -64,6 +64,18 @@ In Render → `fleetflow-api` → **Environment**, update:
 - `FRONTEND_URL` = `https://fleetflow.vercel.app`
 
 Save; Render redeploys. Open your Vercel URL and log in with a demo button.
+
+## 6. Keep the API awake
+
+Render's free plan stops the API after 15 minutes without visitors, and the next visitor then waits about a minute. FleetFlow prevents this itself: on Render it visits its own `/health` address every **11 minutes** (`KEEP_ALIVE_MINUTES`), which Render counts as traffic. Nothing to set up.
+
+That can't help if the server crashes, so add a free outside monitor as a backup. It also emails you when the site is down:
+
+1. Sign up at [uptimerobot.com](https://uptimerobot.com) (free).
+2. **Add New Monitor** → type **HTTP(s)**, URL `https://YOUR-API.onrender.com/health`, interval **5 minutes**.
+3. Add your email under alert contacts.
+
+Render's free plan includes 750 hours a month and one always-on service uses about 744, so this fits, but don't keep a second free service awake on the same account.
 
 ## What's protected in production
 

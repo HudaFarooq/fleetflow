@@ -143,6 +143,7 @@ To use a real provider, add a class with `charge` and `refund` in `backend/app/p
 - **Routes are open:** a vehicle ends at its last stop instead of returning to the depot.
 - **Charging** assumes vans are at the depot until departure. The planner solves once; in production you'd re-solve every slot with fresh battery data (receding horizon).
 - **In-memory state** (login lockouts, assistant limits, WebSocket connections) assumes one API process; several processes would share it through Redis.
+- **Free hosting keep-alive:** on Render the API pings its own `/health` every 11 minutes so the free plan never puts it to sleep (`app/keepalive.py`).
 
 ## API overview
 

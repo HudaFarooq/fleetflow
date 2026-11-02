@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
+from .keepalive import keep_alive
 from .realtime import manager
 from .routers import analytics, assistant, auth, live, parcels, payments, planning, stats, tracking, users, vehicles
 from .simulator import simulator
@@ -14,7 +15,12 @@ from .simulator import simulator
 async def lifespan(_: FastAPI):
     # Lets sync endpoints (which run in worker threads) push live updates onto this loop
     manager.bind_loop(asyncio.get_running_loop())
+    pinger = None
+    if settings.keep_alive_url:
+        pinger = asyncio.create_task(keep_alive(settings.keep_alive_url, settings.keep_alive_minutes))
     yield
+    if pinger:
+        pinger.cancel()
     await simulator.stop()
 
 
